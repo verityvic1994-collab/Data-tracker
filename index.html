@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遺傳性膽固醇與療程追蹤 App</title>
+    <!-- 引入 Chart.js 圖表庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #27ae60;
+            --secondary-color: #e8f5e9;
+            --bg-color: #f4f9f4;
+            --text-color: #333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.15);
+        }
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: var(--secondary-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2e7d32;
+        }
+        .chart-card {
+            background: #fff;
+            border: 1px solid #c8e6c9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .switch-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .switch-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+        .switch-label {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch-label input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        button.submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button.submit-btn:hover {
+            opacity: 0.9;
+        }
+        .history-list {
+            margin-top: 20px;
+        }
+        .history-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.9rem;
+            position: relative;
+        }
+        .history-item button.delete-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            width: auto;
+            cursor: pointer;
+        }
+        .history-item button.edit-btn {
+            position: absolute;
+            right: 60px;
+            top: 10px;
+            background: #0984e3;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            width: auto;
+            cursor: pointer;
+        }
+        /* 檢驗輸入項目列 */
+        .lab-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .lab-row input {
+            flex: 1;
+        }
+        /* 分析區塊樣式 */
+        .analysis-box {
+            background: #fff;
+            border: 1px solid #a5d6a7;
+            border-left: 5px solid #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .analysis-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .analysis-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .stat-card {
+            background: #f1f8e9;
+            padding: 8px;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 45%;
+            text-align: center;
+        }
+        .stat-label { font-size: 0.75rem; color: #666; }
+        .stat-val { font-size: 1rem; font-weight: bold; }
+        .stat-diff-down { color: #27ae60; }
+        .stat-diff-up { color: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💊 完整健檢與療程管理</h1>
+    
+    <div class="card">
+        <h3>💡 檢驗追蹤小秘訣</h3>
+        <p style="margin: 0; font-size: 0.9rem;">依據你的檢驗單順序建立，亦可隨時手動新增自訂項目！</p>
+    </div>
+
+    <!-- 趨勢圖表 (以 Cholesterol 為主) -->
+    <div class="chart-card">
+        <h3 style="text-align: center; margin-top: 0; color: #27ae60; font-size: 1rem;">📈 Cholesterol 總膽固醇趨勢圖</h3>
+        <canvas id="cholChart"></canvas>
+    </div>
+
+    <!-- 智慧療程分析區塊 -->
+    <div class="history-list">
+        <h3>🧬 服藥前後療程分析</h3>
+        <div id="analysis-container">
+            <p style="text-align:center; color:#888; font-size:0.9rem;">尚無足夠的療程資料可供比對</p>
+        </div>
+    </div>
+
+    <form id="chol-form">
+        <input type="hidden" id="chol-id">
+        
+        <div class="form-group">
+            <label for="chol-date">記錄日期 (抽血或看診日)</label>
+            <input type="date" id="chol-date" required>
+        </div>
+
+        <div class="form-group">
+            <label>是否有抽血檢查數值？</label>
+            <div class="switch-group">
+                <label for="has-checkup">填寫檢驗數據</label>
+                <label class="switch-label">
+                    <input type="checkbox" id="has-checkup" onchange="toggleFields()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 依照照片順序排列的檢驗項目表格 -->
+        <div id="checkup-fields" style="display:none; background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:15px;">
+            <h4 style="margin-top:0; color:#27ae60; font-size:0.95rem;">🔬 健檢數據輸入</h4>
+            
+            <!-- 容器：放置所有檢驗項目 (固定項目 + 手動新增項目) -->
+            <div id="lab-inputs-container">
+                <!-- 預設依照片順序帶入的項目 -->
+                <div class="form-group"><label>Basophil</label><input type="text" class="lab-input" data-name="Basophil" placeholder="數值"></div>
+                <div class="form-group"><label>Basophil (2)</label><input type="text" class="lab-input" data-name="Basophil (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Cholesterol</label><input type="text" class="lab-input" data-name="Cholesterol" placeholder="數值"></div>
+                <div class="form-group"><label>Creatinine</label><input type="text" class="lab-input" data-name="Creatinine" placeholder="數值"></div>
+                <div class="form-group"><label>Eosinophil</label><input type="text" class="lab-input" data-name="Eosinophil" placeholder="數值"></div>
+                <div class="form-group"><label>Eosinophil (2)</label><input type="text" class="lab-input" data-name="Eosinophil (2)" placeholder="數值"></div>
+                <div class="form-group"><label>GOT (AST)</label><input type="text" class="lab-input" data-name="GOT (AST)" placeholder="數值"></div>
+                <div class="form-group"><label>GPT (ALT)</label><input type="text" class="lab-input" data-name="GPT (ALT)" placeholder="數值"></div>
+                <div class="form-group"><label>Glucose (AC)</label><input type="text" class="lab-input" data-name="Glucose (AC)" placeholder="數值"></div>
+                <div class="form-group"><label>HDL-cholesterol</label><input type="text" class="lab-input" data-name="HDL-cholesterol" placeholder="數值"></div>
+                <div class="form-group"><label>Hb</label><input type="text" class="lab-input" data-name="Hb" placeholder="數值"></div>
+                <div class="form-group"><label>Hb (2)</label><input type="text" class="lab-input" data-name="Hb (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Hct</label><input type="text" class="lab-input" data-name="Hct" placeholder="數值"></div>
+                <div class="form-group"><label>Hct (2)</label><input type="text" class="lab-input" data-name="Hct (2)" placeholder="數值"></div>
+                <div class="form-group"><label>IgE</label><input type="text" class="lab-input" data-name="IgE" placeholder="數值"></div>
+                <div class="form-group"><label>LDL-cholesterol</label><input type="text" class="lab-input" data-name="LDL-cholesterol" placeholder="數值"></div>
+                <div class="form-group"><label>Lymphocytes</label><input type="text" class="lab-input" data-name="Lymphocytes" placeholder="數值"></div>
+                <div class="form-group"><label>Lymphocytes (2)</label><input type="text" class="lab-input" data-name="Lymphocytes (2)" placeholder="數值"></div>
+                <div class="form-group"><label>MCH</label><input type="text" class="lab-input" data-name="MCH" placeholder="數值"></div>
+                <div class="form-group"><label>MCH (2)</label><input type="text" class="lab-input" data-name="MCH (2)" placeholder="數值"></div>
+                <div class="form-group"><label>MCHC</label><input type="text" class="lab-input" data-name="MCHC" placeholder="數值"></div>
+                <div class="form-group"><label>MCHC (2)</label><input type="text" class="lab-input" data-name="MCHC (2)" placeholder="數值"></div>
+                <div class="form-group"><label>MCV</label><input type="text" class="lab-input" data-name="MCV" placeholder="數值"></div>
+                <div class="form-group"><label>MCV (2)</label><input type="text" class="lab-input" data-name="MCV (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Monocyte</label><input type="text" class="lab-input" data-name="Monocyte" placeholder="數值"></div>
+                <div class="form-group"><label>Monocyte (2)</label><input type="text" class="lab-input" data-name="Monocyte (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Neutrophil-Band</label><input type="text" class="lab-input" data-name="Neutrophil-Band" placeholder="數值"></div>
+                <div class="form-group"><label>Neutrophil-Band (2)</label><input type="text" class="lab-input" data-name="Neutrophil-Band (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Neutrophil-Seg</label><input type="text" class="lab-input" data-name="Neutrophil-Seg" placeholder="數值"></div>
+                <div class="form-group"><label>Neutrophil-Seg (2)</label><input type="text" class="lab-input" data-name="Neutrophil-Seg (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Platelet</label><input type="text" class="lab-input" data-name="Platelet" placeholder="數值"></div>
+                <div class="form-group"><label>Platelet (2)</label><input type="text" class="lab-input" data-name="Platelet (2)" placeholder="數值"></div>
+                <div class="form-group"><label>RBC</label><input type="text" class="lab-input" data-name="RBC" placeholder="數值"></div>
+                <div class="form-group"><label>RBC (2)</label><input type="text" class="lab-input" data-name="RBC (2)" placeholder="數值"></div>
+                <div class="form-group"><label>Triglyceride</label><input type="text" class="lab-input" data-name="Triglyceride" placeholder="數值"></div>
+                <div class="form-group"><label>Uric Acid</label><input type="text" class="lab-input" data-name="Uric Acid" placeholder="數值"></div>
+                <div class="form-group"><label>WBC count</label><input type="text" class="lab-input" data-name="WBC count" placeholder="數值"></div>
+                <div class="form-group"><label>WBC count (2)</label><input type="text" class="lab-input" data-name="WBC count (2)" placeholder="數值"></div>
+                <div class="form-group"><label>eGFR(CKD-EPI)</label><input type="text" class="lab-input" data-name="eGFR(CKD-EPI)" placeholder="數值"></div>
+                <div class="form-group"><label>eGFR(MDRD)</label><input type="text" class="lab-input" data-name="eGFR(MDRD)" placeholder="數值"></div>
+            </div>
+
+            <!-- 手動新增檢驗項目的按鈕 -->
+            <button type="button" onclick="addCustomLabField()" style="background:#0984e3; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; margin-top:10px;">➕ 新增自訂檢驗項目</button>
+        </div>
+
+        <div class="form-group">
+            <label>是否有服用或調整降膽固醇藥物？</label>
+            <div class="switch-group">
+                <label for="has-med">記錄用藥調整</label>
+                <label class="switch-label">
+                    <input type="checkbox" id="has-med" onchange="toggleFields()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 用藥輸入區 -->
+        <div id="med-fields" style="display:none; background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:15px;">
+            <div class="form-group">
+                <label for="med-name">藥物名稱與劑量</label>
+                <input type="text" id="med-name" placeholder="例如: 立普妥 (Lipitor) 10mg">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="note">備註</label>
+            <textarea id="note" rows="2" placeholder="醫師建議或其他筆記..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">儲存記錄</button>
+    </form>
+
+    <div class="history-list">
+        <h3>歷史紀錄列表</h3>
+        <div id="history-container"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('chol-date').valueAsDate = new Date();
+    
+    let records = JSON.parse(localStorage.getItem('full_lab_records')) || [];
+
+    const form = document.getElementById('chol-form');
+    const historyContainer = document.getElementById('history-container');
+    const analysisContainer = document.getElementById('analysis-container');
+    let cholChart = null;
+
+    function toggleFields() {
+        const hasCheckup = document.getElementById('has-checkup').checked;
+        const hasMed = document.getElementById('has-med').checked;
+        document.getElementById('checkup-fields').style.display = hasCheckup ? 'block' : 'none';
+        document.getElementById('med-fields').style.display = hasMed ? 'block' : 'none';
+    }
+
+    // 手動新增自訂檢驗項目的輸入框
+    function addCustomLabField(customName = '', customVal = '') {
+        const container = document.getElementById('lab-inputs-container');
+        const div = document.createElement('div');
+        div.className = 'lab-row';
+        div.innerHTML = `
+            <input type="text" class="custom-lab-name" placeholder="項目名稱" value="${customName}" style="flex:1;">
+            <input type="text" class="custom-lab-val" placeholder="數值" value="${customVal}" style="flex:1;">
+            <button type="button" onclick="this.parentElement.remove()" style="background:#ff4757; color:white; border:none; padding:8px 10px; border-radius:6px; cursor:pointer;">X</button>
+        `;
+        container.appendChild(div);
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('chol-id').value;
+        const date = document.getElementById('chol-date').value;
+        const hasCheckup = document.getElementById('has-checkup').checked;
+        const hasMed = document.getElementById('has-med').checked;
+        const note = document.getElementById('note').value;
+
+        // 收集所有標準檢驗數值
+        const checkup = {};
+        if (hasCheckup) {
+            document.querySelectorAll('.lab-input').forEach(input => {
+                const name = input.getAttribute('data-name');
+                if (input.value.trim() !== '') {
+                    checkup[name] = input.value.trim();
+                }
+            });
+            // 收集自訂檢驗項目
+            document.querySelectorAll('.lab-row').forEach(row => {
+                const nameInput = row.querySelector('.custom-lab-name');
+                const valInput = row.querySelector('.custom-lab-val');
+                if (nameInput && valInput && nameInput.value.trim() !== '' && valInput.value.trim() !== '') {
+                    checkup[nameInput.value.trim()] = valInput.value.trim();
+                }
+            });
+        }
+
+        const medication = hasMed ? {
+            name: document.getElementById('med-name').value
+        } : null;
+
+        if (id) {
+            records = records.map(r => r.id == id ? { id: Number(id), date, hasCheckup, checkup: hasCheckup ? checkup : null, hasMed, medication, note } : r);
+            document.getElementById('chol-id').value = '';
+            document.getElementById('submit-btn').textContent = '儲存記錄';
+        } else {
+            const newRecord = {
+                id: Date.now(),
+                date,
+                hasCheckup,
+                checkup: hasCheckup ? checkup : null,
+                hasMed,
+                medication,
+                note
+            };
+            records.push(newRecord);
+        }
+
+        records.sort((a, b) => new Date(a.date) - new Date(b.date));
+        localStorage.setItem('full_lab_records', JSON.stringify(records));
+        
+        form.reset();
+        document.getElementById('chol-date').valueAsDate = new Date();
+        document.getElementById('lab-inputs-container').querySelectorAll('input').forEach(i => i.value = '');
+        // 清除自訂動態行
+        document.querySelectorAll('.lab-row').forEach(row => row.remove());
+        toggleFields();
+        renderAll();
+    });
+
+    function deleteRecord(id) {
+        if(confirm('確定要刪除這筆紀錄嗎？')) {
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem('full_lab_records', JSON.stringify(records));
+            renderAll();
+        }
+    }
+
+    function editRecord(id) {
+        const record = records.find(r => r.id === id);
+        if (record) {
+            document.getElementById('chol-id').value = record.id;
+            document.getElementById('chol-date').value = record.date;
+            document.getElementById('has-checkup').checked = record.hasCheckup;
+            document.getElementById('has-med').checked = record.hasMed;
+            toggleFields();
+
+            // 清空並重設標準欄位
+            document.querySelectorAll('.lab-input').forEach(i => i.value = '');
+            document.querySelectorAll('.lab-row').forEach(row => row.remove());
+
+            if (record.hasCheckup && record.checkup) {
+                for (const [key, val] of Object.entries(record.checkup)) {
+                    const standardInput = document.querySelector(`.lab-input[data-name="${key}"]`);
+                    if (standardInput) {
+                        standardInput.value = val;
+                    } else {
+                        // 如果是自訂項目，動態生回來
+                        addCustomLabField(key, val);
+                    }
+                }
+            }
+            if (record.hasMed && record.medication) {
+                document.getElementById('med-name').value = record.medication.name || '';
+            }
+            document.getElementById('note').value = record.note || '';
+
+            document.getElementById('submit-btn').textContent = '修改記錄';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // 智慧分析療程邏輯
+    function renderAnalysis() {
+        analysisContainer.innerHTML = '';
+        const checkups = records.filter(r => r.hasCheckup && r.checkup);
+        const meds = records.filter(r => r.hasMed && r.medication);
+
+        if (meds.length === 0 || checkups.length < 2) {
+            analysisContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:0.9rem;">請記錄服藥前抽血、服藥紀錄以及三個月後的複檢數據，系統將自動比對各項數據變化！</p>';
+            return;
+        }
+
+        let html = '';
+        meds.forEach(med => {
+            const medDate = new Date(med.date);
+            const postCheckup = checkups.find(c => new Date(c.date) >= medDate);
+            const preCheckups = checkups.filter(c => new Date(c.date) < medDate);
+            const preCheckup = preCheckups.length > 0 ? preCheckups[preCheckups.length - 1] : null;
+
+            if (preCheckup && postCheckup) {
+                html += `
+                    <div class="analysis-box">
+                        <div class="analysis-title">💊 療程：${med.medication.name} (介入日: ${med.date})</div>
+                        <div style="font-size: 0.8rem; color: #555;">原始抽血 (${preCheckup.date}) ➔ 追蹤抽血 (${postCheckup.date})</div>
+                        <div class="analysis-grid">
+                `;
+
+                // 比對所有有出現的健檢項目
+                const allKeys = new Set([...Object.keys(preCheckup.checkup), ...Object.keys(postCheckup.checkup)]);
+                allKeys.forEach(key => {
+                    const preVal = parseFloat(preCheckup.checkup[key]);
+                    const postVal = parseFloat(postCheckup.checkup[key]);
+                    let pctStr = '';
+                    let diffClass = '';
+
+                    if (!isNaN(preVal) && !isNaN(postVal) && preVal !== 0) {
+                        const diff = postVal - preVal;
+                        const pct = ((diff / preVal) * 100).toFixed(1);
+                        diffClass = pct <= 0 ? 'stat-diff-down' : 'stat-diff-up';
+                        pctStr = pct <= 0 ? `${pct}%` : `+${pct}%`;
+                    }
+
+                    html += `
+                        <div class="stat-card">
+                            <div class="stat-label">${key}</div>
+                            <div class="stat-val">${preCheckup.checkup[key] || '-'} ➔ ${postCheckup.checkup[key] || '-'}</div>
+                            <div class="stat-val ${diffClass}">${pctStr}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            }
+        });
+
+        analysisContainer.innerHTML = html || '<p style="text-align:center; color:#888; font-size:0.9rem;">尚未形成完整的「用藥前後」對照數據。</p>';
+    }
+
+    function updateChart() {
+        const ctx = document.getElementById('cholChart').getContext('2d');
+        const chartData = [...records]
+            .filter(r => r.hasCheckup && r.checkup && (r.checkup['Cholesterol'] || r.checkup['LDL-cholesterol']))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const labels = chartData.map(r => r.date);
+        const cholData = chartData.map(r => r.checkup['Cholesterol'] ? parseFloat(r.checkup['Cholesterol']) : null);
+        const ldlData = chartData.map(r => r.checkup['LDL-cholesterol'] ? parseFloat(r.checkup['LDL-cholesterol']) : null);
+
+        if (cholChart) cholChart.destroy();
+
+        cholChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Cholesterol',
+                        data: cholData,
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.2
+                    },
+                    {
+                        label: 'LDL-cholesterol',
+                        data: ldlData,
+                        borderColor: '#e67e22',
+                        backgroundColor: 'rgba(230, 126, 34, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { suggestedMin: 100, suggestedMax: 300 } }
+            }
+        });
+    }
+
+    function renderHistory() {
+        historyContainer.innerHTML = '';
+        const displayRecords = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (displayRecords.length === 0) {
+            historyContainer.innerHTML = '<p style="text-align:center; color:#888;">尚無任何記錄</p>';
+            updateChart();
+            return;
+        }
+
+        displayRecords.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            
+            let checkupHTML = '';
+            if (r.hasCheckup && r.checkup) {
+                let itemsStr = Object.entries(r.checkup).map(([k, v]) => `${k}: ${v}`).join(' | ');
+                checkupHTML = `🔬 數值: <span style="font-size:0.85rem; color:#555;">${itemsStr}</span><br>`;
+            }
+            
+            let medText = r.hasMed && r.medication ? `💊 用藥: ${r.medication.name}<br>` : '';
+
+            div.innerHTML = `
+                <strong>📅 ${r.date}</strong><br>
+                ${checkupHTML}
+                ${medText}
+                ${r.note ? `<small>備註: ${r.note}</small>` : ''}
+                <button class="delete-btn" onclick="deleteRecord(${r.id})">刪除</button>
+                <button class="edit-btn" onclick="editRecord(${r.id})">修改</button>
+            `;
+            historyContainer.appendChild(div);
+        });
+
+        updateChart();
+    }
+
+    function renderAll() {
+        renderHistory();
+        renderAnalysis();
+    }
+
+    renderAll();
+</script>
+
+</body>
+</html>
