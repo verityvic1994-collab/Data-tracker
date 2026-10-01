@@ -163,17 +163,12 @@
             width: auto;
             cursor: pointer;
         }
-        /* 檢驗輸入項目列 */
         .lab-row {
             display: flex;
             gap: 10px;
             margin-bottom: 8px;
             align-items: center;
         }
-        .lab-row input {
-            flex: 1;
-        }
-        /* 分析區塊樣式 */
         .analysis-box {
             background: #fff;
             border: 1px solid #a5d6a7;
@@ -215,16 +210,14 @@
     
     <div class="card">
         <h3>💡 檢驗追蹤小秘訣</h3>
-        <p style="margin: 0; font-size: 0.9rem;">依據你的檢驗單順序建立，亦可隨時手動新增自訂項目！</p>
+        <p style="margin: 0; font-size: 0.9rem;">已移除重複項目，介面更加清爽俐落！</p>
     </div>
 
-    <!-- 趨勢圖表 (以 Cholesterol 為主) -->
     <div class="chart-card">
         <h3 style="text-align: center; margin-top: 0; color: #27ae60; font-size: 1rem;">📈 Cholesterol 總膽固醇趨勢圖</h3>
         <canvas id="cholChart"></canvas>
     </div>
 
-    <!-- 智慧療程分析區塊 -->
     <div class="history-list">
         <h3>🧬 服藥前後療程分析</h3>
         <div id="analysis-container">
@@ -251,56 +244,39 @@
             </div>
         </div>
 
-        <!-- 依照照片順序排列的檢驗項目表格 -->
+        <!-- 不重複的檢驗項目清單 -->
         <div id="checkup-fields" style="display:none; background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:15px;">
             <h4 style="margin-top:0; color:#27ae60; font-size:0.95rem;">🔬 健檢數據輸入</h4>
             
-            <!-- 容器：放置所有檢驗項目 (固定項目 + 手動新增項目) -->
             <div id="lab-inputs-container">
-                <!-- 預設依照片順序帶入的項目 -->
                 <div class="form-group"><label>Basophil</label><input type="text" class="lab-input" data-name="Basophil" placeholder="數值"></div>
-                <div class="form-group"><label>Basophil (2)</label><input type="text" class="lab-input" data-name="Basophil (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Cholesterol</label><input type="text" class="lab-input" data-name="Cholesterol" placeholder="數值"></div>
                 <div class="form-group"><label>Creatinine</label><input type="text" class="lab-input" data-name="Creatinine" placeholder="數值"></div>
                 <div class="form-group"><label>Eosinophil</label><input type="text" class="lab-input" data-name="Eosinophil" placeholder="數值"></div>
-                <div class="form-group"><label>Eosinophil (2)</label><input type="text" class="lab-input" data-name="Eosinophil (2)" placeholder="數值"></div>
                 <div class="form-group"><label>GOT (AST)</label><input type="text" class="lab-input" data-name="GOT (AST)" placeholder="數值"></div>
                 <div class="form-group"><label>GPT (ALT)</label><input type="text" class="lab-input" data-name="GPT (ALT)" placeholder="數值"></div>
                 <div class="form-group"><label>Glucose (AC)</label><input type="text" class="lab-input" data-name="Glucose (AC)" placeholder="數值"></div>
                 <div class="form-group"><label>HDL-cholesterol</label><input type="text" class="lab-input" data-name="HDL-cholesterol" placeholder="數值"></div>
                 <div class="form-group"><label>Hb</label><input type="text" class="lab-input" data-name="Hb" placeholder="數值"></div>
-                <div class="form-group"><label>Hb (2)</label><input type="text" class="lab-input" data-name="Hb (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Hct</label><input type="text" class="lab-input" data-name="Hct" placeholder="數值"></div>
-                <div class="form-group"><label>Hct (2)</label><input type="text" class="lab-input" data-name="Hct (2)" placeholder="數值"></div>
                 <div class="form-group"><label>IgE</label><input type="text" class="lab-input" data-name="IgE" placeholder="數值"></div>
                 <div class="form-group"><label>LDL-cholesterol</label><input type="text" class="lab-input" data-name="LDL-cholesterol" placeholder="數值"></div>
                 <div class="form-group"><label>Lymphocytes</label><input type="text" class="lab-input" data-name="Lymphocytes" placeholder="數值"></div>
-                <div class="form-group"><label>Lymphocytes (2)</label><input type="text" class="lab-input" data-name="Lymphocytes (2)" placeholder="數值"></div>
                 <div class="form-group"><label>MCH</label><input type="text" class="lab-input" data-name="MCH" placeholder="數值"></div>
-                <div class="form-group"><label>MCH (2)</label><input type="text" class="lab-input" data-name="MCH (2)" placeholder="數值"></div>
                 <div class="form-group"><label>MCHC</label><input type="text" class="lab-input" data-name="MCHC" placeholder="數值"></div>
-                <div class="form-group"><label>MCHC (2)</label><input type="text" class="lab-input" data-name="MCHC (2)" placeholder="數值"></div>
                 <div class="form-group"><label>MCV</label><input type="text" class="lab-input" data-name="MCV" placeholder="數值"></div>
-                <div class="form-group"><label>MCV (2)</label><input type="text" class="lab-input" data-name="MCV (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Monocyte</label><input type="text" class="lab-input" data-name="Monocyte" placeholder="數值"></div>
-                <div class="form-group"><label>Monocyte (2)</label><input type="text" class="lab-input" data-name="Monocyte (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Neutrophil-Band</label><input type="text" class="lab-input" data-name="Neutrophil-Band" placeholder="數值"></div>
-                <div class="form-group"><label>Neutrophil-Band (2)</label><input type="text" class="lab-input" data-name="Neutrophil-Band (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Neutrophil-Seg</label><input type="text" class="lab-input" data-name="Neutrophil-Seg" placeholder="數值"></div>
-                <div class="form-group"><label>Neutrophil-Seg (2)</label><input type="text" class="lab-input" data-name="Neutrophil-Seg (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Platelet</label><input type="text" class="lab-input" data-name="Platelet" placeholder="數值"></div>
-                <div class="form-group"><label>Platelet (2)</label><input type="text" class="lab-input" data-name="Platelet (2)" placeholder="數值"></div>
                 <div class="form-group"><label>RBC</label><input type="text" class="lab-input" data-name="RBC" placeholder="數值"></div>
-                <div class="form-group"><label>RBC (2)</label><input type="text" class="lab-input" data-name="RBC (2)" placeholder="數值"></div>
                 <div class="form-group"><label>Triglyceride</label><input type="text" class="lab-input" data-name="Triglyceride" placeholder="數值"></div>
                 <div class="form-group"><label>Uric Acid</label><input type="text" class="lab-input" data-name="Uric Acid" placeholder="數值"></div>
                 <div class="form-group"><label>WBC count</label><input type="text" class="lab-input" data-name="WBC count" placeholder="數值"></div>
-                <div class="form-group"><label>WBC count (2)</label><input type="text" class="lab-input" data-name="WBC count (2)" placeholder="數值"></div>
                 <div class="form-group"><label>eGFR(CKD-EPI)</label><input type="text" class="lab-input" data-name="eGFR(CKD-EPI)" placeholder="數值"></div>
                 <div class="form-group"><label>eGFR(MDRD)</label><input type="text" class="lab-input" data-name="eGFR(MDRD)" placeholder="數值"></div>
             </div>
 
-            <!-- 手動新增檢驗項目的按鈕 -->
             <button type="button" onclick="addCustomLabField()" style="background:#0984e3; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; margin-top:10px;">➕ 新增自訂檢驗項目</button>
         </div>
 
@@ -315,7 +291,6 @@
             </div>
         </div>
 
-        <!-- 用藥輸入區 -->
         <div id="med-fields" style="display:none; background:#f9f9f9; padding:12px; border-radius:8px; margin-bottom:15px;">
             <div class="form-group">
                 <label for="med-name">藥物名稱與劑量</label>
@@ -340,7 +315,7 @@
 <script>
     document.getElementById('chol-date').valueAsDate = new Date();
     
-    let records = JSON.parse(localStorage.getItem('full_lab_records')) || [];
+    let records = JSON.parse(localStorage.getItem('full_lab_records_clean')) || [];
 
     const form = document.getElementById('chol-form');
     const historyContainer = document.getElementById('history-container');
@@ -354,7 +329,6 @@
         document.getElementById('med-fields').style.display = hasMed ? 'block' : 'none';
     }
 
-    // 手動新增自訂檢驗項目的輸入框
     function addCustomLabField(customName = '', customVal = '') {
         const container = document.getElementById('lab-inputs-container');
         const div = document.createElement('div');
@@ -376,7 +350,6 @@
         const hasMed = document.getElementById('has-med').checked;
         const note = document.getElementById('note').value;
 
-        // 收集所有標準檢驗數值
         const checkup = {};
         if (hasCheckup) {
             document.querySelectorAll('.lab-input').forEach(input => {
@@ -385,7 +358,6 @@
                     checkup[name] = input.value.trim();
                 }
             });
-            // 收集自訂檢驗項目
             document.querySelectorAll('.lab-row').forEach(row => {
                 const nameInput = row.querySelector('.custom-lab-name');
                 const valInput = row.querySelector('.custom-lab-val');
@@ -417,12 +389,11 @@
         }
 
         records.sort((a, b) => new Date(a.date) - new Date(b.date));
-        localStorage.setItem('full_lab_records', JSON.stringify(records));
+        localStorage.setItem('full_lab_records_clean', JSON.stringify(records));
         
         form.reset();
         document.getElementById('chol-date').valueAsDate = new Date();
         document.getElementById('lab-inputs-container').querySelectorAll('input').forEach(i => i.value = '');
-        // 清除自訂動態行
         document.querySelectorAll('.lab-row').forEach(row => row.remove());
         toggleFields();
         renderAll();
@@ -431,7 +402,7 @@
     function deleteRecord(id) {
         if(confirm('確定要刪除這筆紀錄嗎？')) {
             records = records.filter(r => r.id !== id);
-            localStorage.setItem('full_lab_records', JSON.stringify(records));
+            localStorage.setItem('full_lab_records_clean', JSON.stringify(records));
             renderAll();
         }
     }
@@ -445,7 +416,6 @@
             document.getElementById('has-med').checked = record.hasMed;
             toggleFields();
 
-            // 清空並重設標準欄位
             document.querySelectorAll('.lab-input').forEach(i => i.value = '');
             document.querySelectorAll('.lab-row').forEach(row => row.remove());
 
@@ -455,7 +425,6 @@
                     if (standardInput) {
                         standardInput.value = val;
                     } else {
-                        // 如果是自訂項目，動態生回來
                         addCustomLabField(key, val);
                     }
                 }
@@ -470,7 +439,6 @@
         }
     }
 
-    // 智慧分析療程邏輯
     function renderAnalysis() {
         analysisContainer.innerHTML = '';
         const checkups = records.filter(r => r.hasCheckup && r.checkup);
@@ -496,7 +464,6 @@
                         <div class="analysis-grid">
                 `;
 
-                // 比對所有有出現的健檢項目
                 const allKeys = new Set([...Object.keys(preCheckup.checkup), ...Object.keys(postCheckup.checkup)]);
                 allKeys.forEach(key => {
                     const preVal = parseFloat(preCheckup.checkup[key]);
